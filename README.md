@@ -2,6 +2,15 @@
 
 Spring Boot 4.1.1, Java target 21, Maven Wrapper, PostgreSQL. Repository frontend: https://github.com/Haohao2309/web-booking.
 
+## Quy chuẩn và tài liệu bàn giao
+
+- [Quy trình phát triển View–Model–Controller](docs/QUY-TRINH-PHAT-TRIEN-CHUC-NANG.md).
+- [Hợp đồng response và phân trang](docs/API-CONTRACT.md): quy chuẩn mục tiêu `{success, message, data, status}`; mọi danh sách phân trang server. Runtime hiện chưa chuyển đổi sang hợp đồng này.
+- [Mẫu bàn giao chức năng](docs/templates/FEATURE-REPORT.md).
+- [Bản ghi đồng bộ quy chuẩn](docs/changes/2026-11-02-quy-chuan-va-tai-lieu-ban-giao.md).
+
+Bắt buộc sau mỗi chức năng/sửa lỗi/refactor/cấu hình/tài liệu: có bản ghi trong `docs/changes/` trước khi bàn giao hoặc gửi PR review. Ghi hành vi đã làm, file thêm/sửa/xóa/đổi tên và lý do, ảnh hưởng, kiểm tra thực tế, giới hạn, cách xác minh và triển khai. PR phải dẫn link tới bản ghi. Không dùng commit message thay thế tài liệu.
+
 ## Phạm vi hiện tại
 
 Đã có cấu hình database, session cookie HttpOnly, CSRF, CORS allowlist, rule vai trò, health, validation error handler, kiểm thử và GitHub Actions. Chưa có entity/repository/controller nghiệp vụ đăng nhập, đăng ký, phòng, đặt phòng, hóa đơn hoặc thanh toán. Không có tài khoản mặc định và không cung cấp API giả báo thành công. UserDetailsService hiện từ chối tất cả tài khoản cho tới khi có xác thực qua database.
