@@ -10,14 +10,15 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import com.example.api_booking.repository.AppUserRepository;
 
 @Configuration
 @EnableMethodSecurity
@@ -57,16 +58,20 @@ public class SecurityConfig {
             .build();
     }
 
-    // Fail closed until the database-backed authentication feature is implemented.
-    // Prevent Spring Boot from provisioning a generated default user/password.
-    @Bean
-    UserDetailsService userDetailsService() {
-        return username -> { throw new UsernameNotFoundException("Account not found"); };
-    }
-
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    UserDetailsService userDetailsService(AppUserRepository users) {
+        return username -> users.findByEmailIgnoreCase(username)
+            .map(user -> User.withUsername(user.getEmail())
+                .password(user.getPasswordHash())
+                .roles(user.getRole().name())
+                .disabled(!user.isEnabled())
+                .build())
+            .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("Account not found"));
     }
 
     @Bean
