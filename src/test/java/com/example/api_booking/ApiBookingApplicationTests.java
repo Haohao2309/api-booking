@@ -14,6 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.api_booking.entity.AppUser;
+import com.example.api_booking.repository.AppUserRepository;
+import com.example.api_booking.entity.UserRole;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,6 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(ApiBookingApplicationTests.ProbeController.class)
 class ApiBookingApplicationTests {
     @Autowired MockMvc mvc;
+    @Autowired AppUserRepository users;
+    @Autowired PasswordEncoder passwordEncoder;
 
     @Test
     void healthIsPublicAndDoesNotLeakDatabaseDetails() throws Exception {
@@ -56,6 +62,27 @@ class ApiBookingApplicationTests {
     }
 
     @Test
+    void loginUsesSaltedPbkdf2Sha256AndCreatesAuthenticatedSession() throws Exception {
+        users.save(new AppUser("customer@example.com", passwordEncoder.encode("correct-password"), UserRole.CUSTOMER));
+
+        mvc.perform(post("/api/auth/login")
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"email\":\"customer@example.com\",\"password\":\"correct-password\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.email").value("customer@example.com"))
+            .andExpect(jsonPath("$.data.role").value("CUSTOMER"));
+
+        mvc.perform(post("/api/auth/login")
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"email\":\"customer@example.com\",\"password\":\"wrong-password\"}"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
     void onlyConfiguredOriginGetsCredentialedCors() throws Exception {
         mvc.perform(options("/api/auth/login")
                 .header("Origin", "http://localhost:5173")
@@ -72,7 +99,6 @@ class ApiBookingApplicationTests {
     // Test-only handlers prove authorization reaches controllers, without adding fake production APIs.
     @RestController
     static class ProbeController {
-        @PostMapping("/api/auth/login") String login() { return "ok"; }
         @PostMapping("/api/rooms") String createRoom() { return "ok"; }
         @GetMapping("/api/bookings") String bookings() { return "ok"; }
     }
@@ -83,7 +109,7 @@ class ApiBookingApplicationTests {
         String token = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
         var session = (MockHttpSession) result.getRequest().getSession(false);
         mvc.perform(post("/api/auth/login").session(session).header("X-CSRF-TOKEN", token))
-            .andExpect(status().isOk());
+            .andExpect(status().isBadRequest());
         mvc.perform(post("/api/auth/login").header("X-CSRF-TOKEN", token))
             .andExpect(status().isForbidden());
     }
