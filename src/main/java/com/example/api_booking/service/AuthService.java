@@ -57,6 +57,15 @@ public class AuthService {
         return new LoginResult(user.getId(), user.getEmail(), user.getRole().name());
     }
 
+    /** Clears the authenticated security context and invalidates the current session. */
+    public void logout(HttpServletRequest request) {
+        SecurityContextHolder.clearContext();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+    }
+
     /**
      * Registers a new customer account with a BCrypt password hash.
      *

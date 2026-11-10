@@ -41,6 +41,13 @@ public class AuthController {
         return ApiResponse.success("Authenticated user", authService.currentUser(authentication.getName()), 200);
     }
 
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> logout(HttpServletRequest request) {
+        authService.logout(request);
+        return ApiResponse.success("Logout successful", null, 200);
+    }
+
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
