@@ -30,6 +30,7 @@ jobs:
         run: bash ./mvnw --batch-mode verify
       - name: Start with PostgreSQL and check health
         env:
+          DB_USERNAME: booking
           DB_PASSWORD: ci-only-password
           DB_URL: jdbc:postgresql://localhost:5432/booking
         run: |
