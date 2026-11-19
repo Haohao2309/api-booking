@@ -1,0 +1,1 @@
+ALTER TABLE refunds ADD COLUMN request_sent_at TIMESTAMP WITH TIME ZONE;
