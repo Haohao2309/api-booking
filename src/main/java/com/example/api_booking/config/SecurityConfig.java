@@ -34,10 +34,11 @@ public class SecurityConfig {
             .requestCache(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/api/health", "/api/auth/csrf").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/forgot-password", "/api/auth/verify-reset-code", "/api/auth/reset-password").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/rooms", "/api/rooms/*").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/rooms").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/test-rooms").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/rooms/*").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/rooms/*").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/bookings").hasAnyRole("ADMIN", "RECEPTIONIST")

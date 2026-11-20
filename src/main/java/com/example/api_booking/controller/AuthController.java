@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
 import com.example.api_booking.service.AuthService;
 import com.example.api_booking.dto.RegisterRequest;
+import com.example.api_booking.dto.ForgotPasswordRequest;
+import com.example.api_booking.dto.VerifyResetCodeRequest;
+import com.example.api_booking.dto.ResetPasswordRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -54,6 +57,24 @@ public class AuthController {
     public ApiResponse<com.example.api_booking.dto.RegisterResponse> register(
             @Valid @RequestBody RegisterRequest request) {
         return ApiResponse.success("Account created", authService.register(request), 201);
+    }
+
+    @PostMapping("/forgot-password")
+    public ApiResponse<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.requestPasswordReset(request);
+        return ApiResponse.success("If the email exists, a reset code has been sent", null, 200);
+    }
+
+    @PostMapping("/verify-reset-code")
+    public ApiResponse<Void> verifyResetCode(@Valid @RequestBody VerifyResetCodeRequest request) {
+        authService.verifyResetCode(request);
+        return ApiResponse.success("Reset code is valid", null, 200);
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponse<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ApiResponse.success("Password reset successful", null, 200);
     }
 
     public record LoginRequest(

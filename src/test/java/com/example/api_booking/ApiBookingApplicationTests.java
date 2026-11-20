@@ -99,7 +99,7 @@ class ApiBookingApplicationTests {
     // Test-only handlers prove authorization reaches controllers, without adding fake production APIs.
     @RestController
     static class ProbeController {
-        @PostMapping("/api/rooms") String createRoom() { return "ok"; }
+        @PostMapping("/api/test-rooms") String createRoom() { return "ok"; }
         @GetMapping("/api/bookings") String bookings() { return "ok"; }
     }
 
@@ -117,10 +117,10 @@ class ApiBookingApplicationTests {
     @Test
     void onlyAdminCanCreateRooms() throws Exception {
         for (String role : new String[] { "CUSTOMER", "RECEPTIONIST" }) {
-            mvc.perform(post("/api/rooms").with(user("test").roles(role)).with(csrf()))
+            mvc.perform(post("/api/test-rooms").with(user("test").roles(role)).with(csrf()))
                 .andExpect(status().isForbidden());
         }
-        mvc.perform(post("/api/rooms").with(user("admin").roles("ADMIN")).with(csrf()))
+        mvc.perform(post("/api/test-rooms").with(user("admin").roles("ADMIN")).with(csrf()))
             .andExpect(status().isOk());
     }
 
