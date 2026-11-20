@@ -24,8 +24,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain securityFilterChain(
+      HttpSecurity http, com.example.api_booking.repository.UserRepository accountUsers)
+      throws Exception {
     return http.cors(Customizer.withDefaults())
+        .addFilterBefore(
+            new AccountSessionFilter(accountUsers),
+            org.springframework.security.web.access.intercept.AuthorizationFilter.class)
         .csrf(Customizer.withDefaults())
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
@@ -35,6 +40,8 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(
                         HttpMethod.GET, "/api/health", "/api/auth/csrf", "/api/v1/auth/csrf")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/register")
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register")
                     .permitAll()
