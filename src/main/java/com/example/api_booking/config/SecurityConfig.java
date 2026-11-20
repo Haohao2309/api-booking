@@ -35,7 +35,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/api/health", "/api/auth/csrf").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/forgot-password", "/api/auth/verify-reset-code", "/api/auth/reset-password").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/rooms", "/api/rooms/*").permitAll()
+                .requestMatchers(request -> "GET".equals(request.getMethod())
+                    && (request.getRequestURI().equals("/api/rooms")
+                        || request.getRequestURI().startsWith("/api/rooms/")
+                        || request.getRequestURI().equals("/api/locations"))).permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/rooms").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/test-rooms").hasRole("ADMIN")
