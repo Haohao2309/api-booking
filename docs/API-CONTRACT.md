@@ -234,3 +234,13 @@ Ba endpoint công khai, mỗi endpoint có ở cả `/api/auth/...` và `/api/v1
 - Mã gồm 6 chữ số, hiệu lực 10 phút, dùng một lần. Sai 5 lần thì mã bị khóa, phải yêu cầu mã mới. Mã mới vô hiệu hóa mã cũ.
 - `INVALID_RESET_CODE` dùng chung cho mọi trường hợp để không lộ email nào đã đăng ký. `code` sai định dạng (không đủ 6 chữ số) trả `VALIDATION_ERROR` kèm `fieldErrors.code`.
 - `verify-reset-code` chỉ để UI kiểm tra trước. `reset-password` kiểm tra lại mã và đếm lần sai giống hệt.
+
+## 8. Tài khoản của tôi (22/11/2026)
+
+Cần đăng nhập (mọi vai trò). PATCH/PUT gửi CSRF. Response dùng envelope.
+
+| Method/path | Body | Kết quả |
+| --- | --- | --- |
+| GET /api/v1/users/me | – | 200 `{id,email,name,fullName,role,roles,status,phone}`; chưa đăng nhập trả 401 |
+| PATCH /api/v1/users/me | `{fullName?, phone?}` | 200 kèm hồ sơ mới. Field không gửi giữ nguyên; `phone: null` xóa số; `fullName` rỗng/blank hoặc body `{}` trả 400; `phone` gồm 8–15 chữ số, có thể có `+` ở đầu (sai trả 400 kèm `fieldErrors.phone`); số đã thuộc tài khoản khác trả 409 `DATA_CONFLICT`. Không đổi email/role qua API này |
+| PUT /api/v1/users/me/password | `{oldPassword, newPassword, confirmNewPassword}` | 200 `data: null`. Mật khẩu cũ sai hoặc xác nhận không khớp trả 400; `newPassword` 8–72 ký tự, tối đa 72 byte UTF-8. Thành công thì mọi phiên, kể cả phiên hiện tại, bị đăng xuất ở request kế tiếp: client phải đăng nhập lại |
