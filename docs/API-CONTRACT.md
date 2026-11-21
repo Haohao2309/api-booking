@@ -259,3 +259,4 @@ Không cần đăng nhập, chỉ đọc. Mọi danh sách phân trang ở serve
 - Tham số sai (thiếu một trong hai ngày, ngày quá khứ, `minPrice > maxPrice`, `size` ngoài khoảng, sort ngoài danh sách, sai kiểu) trả 400.
 - Kết quả tìm phòng chỉ để tham khảo; server kiểm tra lại khi tạo đơn.
 - `status` của phòng (`AVAILABLE`/`BOOKED`) là trạng thái hôm nay, không thay cho kết quả tìm theo ngày.
+=======
