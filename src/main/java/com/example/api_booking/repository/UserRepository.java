@@ -43,6 +43,12 @@ public class UserRepository {
             () -> new BusinessException(401, "AUTHENTICATION_REQUIRED", "Phiên không hợp lệ"));
   }
 
+  /** Lookup that does not reveal through an exception whether the email exists. */
+  public Optional<UserRow> findByEmail(String email) {
+    return db.query("select * from app_users where lower(email)=lower(?)", mapper, email).stream()
+        .findFirst();
+  }
+
   public UserRow find(long id, boolean lock) {
     return db
         .query("select * from app_users where id=?" + (lock ? " for update" : ""), mapper, id)

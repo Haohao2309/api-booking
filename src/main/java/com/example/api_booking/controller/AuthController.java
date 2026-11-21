@@ -21,9 +21,37 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({"/api/auth", "/api/v1/auth"})
 public class AuthController {
   private final AuthService authService;
+  private final com.example.api_booking.service.PasswordResetService passwordReset;
 
-  public AuthController(AuthService authService) {
+  public AuthController(
+      AuthService authService,
+      com.example.api_booking.service.PasswordResetService passwordReset) {
     this.authService = authService;
+    this.passwordReset = passwordReset;
+  }
+
+  /** Always the same answer, so the response does not reveal whether the email is registered. */
+  @PostMapping("/forgot-password")
+  public ApiResponse<Void> forgotPassword(
+      @Valid @RequestBody com.example.api_booking.dto.ForgotPasswordRequest request) {
+    passwordReset.requestReset(request.email());
+    return ApiResponse.success(
+        "Nếu email đã đăng ký, mã xác nhận sẽ được gửi trong ít phút.", null, 200);
+  }
+
+  @PostMapping("/verify-reset-code")
+  public ApiResponse<Void> verifyResetCode(
+      @Valid @RequestBody com.example.api_booking.dto.VerifyResetCodeRequest request) {
+    passwordReset.verify(request.email(), request.code());
+    return ApiResponse.success("Mã xác nhận hợp lệ.", null, 200);
+  }
+
+  @PostMapping("/reset-password")
+  public ApiResponse<Void> resetPassword(
+      @Valid @RequestBody com.example.api_booking.dto.ResetPasswordRequest request) {
+    passwordReset.reset(
+        request.email(), request.code(), request.newPassword(), request.confirmPassword());
+    return ApiResponse.success("Đặt lại mật khẩu thành công, vui lòng đăng nhập lại.", null, 200);
   }
 
   @PostMapping("/login")

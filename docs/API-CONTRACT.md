@@ -220,3 +220,17 @@ Offset pagination không đảm bảo một snapshot bất biến nếu người
 - Update smoke test health/CI: đọc data.status = UP, đồng thời vẫn kiểm tra HTTP 200; DOWN phải giữ HTTP 503.
 - Đây là thay đổi phá tương thích. Backend và frontend phải được triển khai theo kế hoạch phối hợp, hoặc có lớp tương thích/version tạm thời được xác định rõ.
 - Không để tài liệu ghi đã hoàn tất chuyển đổi khi runtime còn dùng contract cũ.
+
+## 7. Quên mật khẩu (21/11/2026)
+
+Ba endpoint công khai, mỗi endpoint có ở cả `/api/auth/...` và `/api/v1/auth/...`. Vẫn phải gửi CSRF như login/register. Response dùng envelope; thành công trả `data: null`.
+
+| Method/path | Body | Kết quả |
+| --- | --- | --- |
+| POST /forgot-password | `{email}` | Luôn trả 200 cùng một message, kể cả khi email không tồn tại hoặc tài khoản bị khóa. Gửi lại trong vòng 60 giây vẫn trả 200 nhưng không phát mã mới |
+| POST /verify-reset-code | `{email, code}` | 200 nếu mã đúng; sai/hết hạn/đã dùng/bị khóa trả 400 `INVALID_RESET_CODE` |
+| POST /reset-password | `{email, code, newPassword, confirmPassword}` | 200 và mọi phiên cũ bị đăng xuất. Mật khẩu 8–72 ký tự, tối đa 72 byte UTF-8, confirm phải khớp (sai trả 400) |
+
+- Mã gồm 6 chữ số, hiệu lực 10 phút, dùng một lần. Sai 5 lần thì mã bị khóa, phải yêu cầu mã mới. Mã mới vô hiệu hóa mã cũ.
+- `INVALID_RESET_CODE` dùng chung cho mọi trường hợp để không lộ email nào đã đăng ký. `code` sai định dạng (không đủ 6 chữ số) trả `VALIDATION_ERROR` kèm `fieldErrors.code`.
+- `verify-reset-code` chỉ để UI kiểm tra trước. `reset-password` kiểm tra lại mã và đếm lần sai giống hệt.

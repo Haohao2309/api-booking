@@ -1,3 +1,0 @@
-CREATE TABLE locations (id BIGSERIAL PRIMARY KEY, name VARCHAR(120) NOT NULL UNIQUE, description VARCHAR(500));
-CREATE TABLE rooms (id BIGSERIAL PRIMARY KEY, number VARCHAR(40) NOT NULL UNIQUE, name VARCHAR(120) NOT NULL, type VARCHAR(60) NOT NULL, description VARCHAR(1000), capacity INTEGER NOT NULL, price_per_night NUMERIC(12,2) NOT NULL, active BOOLEAN NOT NULL DEFAULT TRUE, location_id BIGINT NOT NULL REFERENCES locations(id));
-INSERT INTO locations(name, description) VALUES ('Trung tâm thành phố', 'Gần các điểm tham quan và dịch vụ tiện ích'), ('Khu nghỉ dưỡng ven biển', 'Không gian yên tĩnh, gần biển');
