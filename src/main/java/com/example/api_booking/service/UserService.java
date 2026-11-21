@@ -55,4 +55,31 @@ public class UserService {
         u.enabled() ? "ACTIVE" : "LOCKED",
         u.phone());
   }
+
+  @Transactional
+  public UserResponseDTO updateProfile(com.example.api_booking.dto.ProfileUpdateRequest request) {
+    if (!request.hasFullName() && !request.hasPhone())
+      throw BusinessException.invalid("Cần gửi fullName hoặc phone");
+    if (request.hasFullName() && (request.getFullName() == null || request.getFullName().isBlank()))
+      throw BusinessException.invalid("Họ tên không được rỗng");
+    var actor = current();
+    var before = users.find(actor.id(), true);
+    String name = request.hasFullName() ? request.getFullName().strip() : before.fullName();
+    String phone = request.hasPhone() ? request.getPhone() : before.phone();
+    users.updateProfile(actor.id(), name, phone);
+    users.audit(actor.id(), "PROFILE_UPDATED", actor.id());
+    return dto(users.find(actor.id(), false));
+  }
+
+  @Transactional
+  public void changePassword(String oldPassword, String newPassword, String confirm) {
+    var u = users.find(current().id(), true);
+    if (!passwords.matches(oldPassword, u.passwordHash()))
+      throw BusinessException.invalid("Mật khẩu cũ không đúng");
+    if (!newPassword.equals(confirm)
+        || newPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
+      throw BusinessException.invalid("Mật khẩu xác nhận không khớp hoặc vượt 72 byte");
+    users.password(u.id(), passwords.encode(newPassword));
+    users.audit(u.id(), "PASSWORD_CHANGED", u.id());
+  }
 }
