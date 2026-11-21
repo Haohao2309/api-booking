@@ -48,6 +48,7 @@ Trên Linux/macOS: export các biến DB_URL, DB_USERNAME, DB_PASSWORD (và các
 | GET /api/auth/csrf | 200 với headerName X-CSRF-TOKEN và token; tạo session khi cần |
 | GET /api/auth/me | 401 khi chưa xác thực; controller tài khoản chưa được triển khai |
 | POST /api/auth/login hoặc register | 403 nếu thiếu/sai CSRF; controller nghiệp vụ chưa triển khai |
+| POST /api/auth/forgot-password, verify-reset-code, reset-password (có cả dưới /api/v1/auth) | Quên mật khẩu bằng mã 6 số qua email; cần CSRF; chỉ gửi mail khi MAIL_ENABLED=true. Xem [contract mục 7](docs/API-CONTRACT.md) và [bản ghi](docs/changes/2026-11-21-quen-mat-khau.md) |
 
 Frontend gọi GET /api/auth/csrf với credentials trước mỗi mutation, giữ cookie phiên và gửi token JSON trong X-CSRF-TOKEN. Token gắn với session, không dùng được với session khác. Giữ Spring Security XOR/BREACH handling mặc định; không dùng XSRF-TOKEN cookie đọc bằng JavaScript. CSRF token không phải access token.
 

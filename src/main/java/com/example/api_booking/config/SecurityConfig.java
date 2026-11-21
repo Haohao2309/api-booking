@@ -45,6 +45,16 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register")
                     .permitAll()
+                    // Public but still CSRF-protected, like login/register.
+                    .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/auth/forgot-password",
+                        "/api/auth/verify-reset-code",
+                        "/api/auth/reset-password",
+                        "/api/v1/auth/forgot-password",
+                        "/api/v1/auth/verify-reset-code",
+                        "/api/v1/auth/reset-password")
+                    .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/rooms", "/api/rooms/*")
                     .permitAll()
                     .requestMatchers("/api/admin/**")
