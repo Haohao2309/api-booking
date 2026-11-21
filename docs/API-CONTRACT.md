@@ -244,3 +244,19 @@ Cần đăng nhập (mọi vai trò). PATCH/PUT gửi CSRF. Response dùng envel
 | GET /api/v1/users/me | – | 200 `{id,email,name,fullName,role,roles,status,phone}`; chưa đăng nhập trả 401 |
 | PATCH /api/v1/users/me | `{fullName?, phone?}` | 200 kèm hồ sơ mới. Field không gửi giữ nguyên; `phone: null` xóa số; `fullName` rỗng/blank hoặc body `{}` trả 400; `phone` gồm 8–15 chữ số, có thể có `+` ở đầu (sai trả 400 kèm `fieldErrors.phone`); số đã thuộc tài khoản khác trả 409 `DATA_CONFLICT`. Không đổi email/role qua API này |
 | PUT /api/v1/users/me/password | `{oldPassword, newPassword, confirmNewPassword}` | 200 `data: null`. Mật khẩu cũ sai hoặc xác nhận không khớp trả 400; `newPassword` 8–72 ký tự, tối đa 72 byte UTF-8. Thành công thì mọi phiên, kể cả phiên hiện tại, bị đăng xuất ở request kế tiếp: client phải đăng nhập lại |
+
+## 9. Catalog công khai (22/11/2026)
+
+Không cần đăng nhập, chỉ đọc. Mọi danh sách phân trang ở server (`page` từ 0, `size` 1–100) và trả `{items,page,size,totalItems,totalPages}`.
+
+| Method/path | Query | Kết quả |
+| --- | --- | --- |
+| GET /api/v1/rooms | `checkIn`, `checkOut` (YYYY-MM-DD, gửi cùng nhau, từ hôm nay, 1–365 đêm), `guests` 1–100, `hotelId`, `roomTypeId`, `minPrice`, `maxPrice`, `sort` ∈ `id,name,code,price` + `asc/desc` | Phòng không bị khóa, thuộc loại phòng đang bán. Có ngày thì chỉ trả phòng trống cho mọi đêm trong `[checkIn, checkOut)`. Giá/sức chứa lấy từ loại phòng. Danh sách không kèm ảnh/tiện ích |
+| GET /api/v1/rooms/{id} | – | Chi tiết gồm `images`, `amenities`, `hotelId`, `roomTypeId`; phòng bị khóa hoặc không tồn tại trả 404 |
+| GET /api/v1/services | `hotelId`, `sort` ∈ `id,name,unit_price` | Dịch vụ đang bán: `{id,hotelId,name,description,unitPrice,unit,imageUrl}` |
+| GET /api/v1/suggestions | `hotelId`, `sort` ∈ `id,name,category` | Địa điểm gợi ý đang hoạt động: `{id,hotelId,name,category,description,address,latitude,longitude,imageUrl}` |
+
+- Tham số sai (thiếu một trong hai ngày, ngày quá khứ, `minPrice > maxPrice`, `size` ngoài khoảng, sort ngoài danh sách, sai kiểu) trả 400.
+- Kết quả tìm phòng chỉ để tham khảo; server kiểm tra lại khi tạo đơn.
+- `status` của phòng (`AVAILABLE`/`BOOKED`) là trạng thái hôm nay, không thay cho kết quả tìm theo ngày.
+=======

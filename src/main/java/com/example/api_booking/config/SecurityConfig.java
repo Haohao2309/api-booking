@@ -55,6 +55,14 @@ public class SecurityConfig {
                         "/api/v1/auth/verify-reset-code",
                         "/api/v1/auth/reset-password")
                     .permitAll()
+                    // Public read-only catalog.
+                    .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/v1/rooms",
+                        "/api/v1/rooms/*",
+                        "/api/v1/services",
+                        "/api/v1/suggestions")
+                    .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/rooms", "/api/rooms/*")
                     .permitAll()
                     .requestMatchers("/api/admin/**")
